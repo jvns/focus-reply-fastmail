@@ -219,12 +219,36 @@ var app = new Vue({
     }
 })
 restore();
+function saveTextAreas() {
+    let drafts = {};
+    for (x of document.querySelectorAll('textarea')) {
+        if (x.value) {
+            drafts[x.id] = x.value;
+        }
+    }
+    if (Object.keys(drafts).length > 0) { 
+        localStorage.setItem('drafts', JSON.stringify(drafts));
+    }
+}
+function loadTextAreas() {
+    let drafts = JSON.parse(localStorage.getItem('drafts') || '{}');
+    for (x of document.querySelectorAll('textarea')) {
+        let saved = drafts[x.id];
+        if (saved) {
+            x.value = saved;
+        }
+    }
+}
+setInterval(saveTextAreas, 1000);
 
 if(app.username && app.password && app.accountId) {
-    get_emails();
+    get_emails().then(() => {
+        loadTextAreas();
+    });
 }
 
 
 </script>
+
 </body>
 </html>
