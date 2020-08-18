@@ -1,0 +1,56 @@
+body {
+    font-family: Inter;
+    background-color: white;
+}
+td {
+    border: 0;
+    margin: 0;
+}
+.email {
+    max-height: 300px;
+    overflow: scroll;
+    margin-right: 3em;
+    line-height: 1.6;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+* {
+    box-sizing: border-box;
+}
+h3 {
+    margin-top: -.5em;
+}
+
+.later {
+    background-color: white;
+    border-radius: 30px;
+    margin: 3em;
+    padding: 1em 2em;
+    box-shadow: 5px 5px 20px 10px #eee;
+}
+textarea {
+    height: 300px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    width: 100%;
+    font-family: Inter;
+    font-size: 1em;
+    padding: 1.5em;
+        resize: none;
+}
+
+
+#login {
+    width: 700px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+#login input {
+    display: block;
+    border: 1px solid #999;
+    border-radius: .5em;
+    margin: .5em 0;
+    padding: .3em;
+}

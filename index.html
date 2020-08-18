@@ -3,56 +3,15 @@
     <head>
         <title>focus and reply</title>
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <link rel="stylesheet" href="style.css"> 
+        <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
         <!-- todo: replace with production version -->
-<style type="text/css">
-body {
-    font-family: Inter;
-    background-color: white;
-}
-td {
-    border: 0;
-    margin: 0;
-}
-.email {
-    max-height: 300px;
-    overflow: scroll;
-    margin-right: 3em;
-    line-height: 1.6;
-}
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-* {
-    box-sizing: border-box;
-}
-h3 {
-    margin-top: -.5em;
-}
-
-.later {
-    background-color: white;
-    border-radius: 30px;
-    margin: 3em;
-    padding: 1em 2em;
-    box-shadow: 5px 5px 20px 10px #eee;
-}
-textarea {
-    height: 300px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    width: 100%;
-    font-family: Inter;
-    font-size: 1em;
-    padding: 1.5em;
-        resize: none;
-}
-
-</style>
-
     </head> 
 <body>
 <div id="app">
+    <h1 class="pt-4 text-3xl text-bold text-center"> focus and reply </h1>
     <div v-if="loggedIn">
+        <button v-on:click.prevent="logout" class="absolute top-0 right-0 rounded my-3 mx-8 p-3 bg-green-700 text-white">Log out</button>
         <div v-for="email in emails" class="later">
             <h2 class="subject">{{email['subject']}}</h2>
             <div style="display: flex">
@@ -70,185 +29,40 @@ textarea {
 
     </div>
     <div v-else>
-        not logged in.
-        Login: 
-        <form>
-            Username: <input v-model="username"></input> <br>
-            Password: <input v-model="password"></input> <br>
-            Account ID: <input v-model="accountId"></input> <br>
-            <button v-on:click.prevent="login">Login</button>
+        <div id="login">
+            <div style="padding: 1em 0">Login to your Fastmail account:</div>
+            <form>
+                <input v-model="username" placeholder="Username" ></input>
+                <input type="password" v-model="password" placeholder="App password"></input>
+                <input v-model="accountId" placeholder="Account ID"></input>
+                <button class="text-white bg-blue-700 rounded px-3 py-1" v-on:click.prevent="login">Login</button>
+            </form>
 
-        </form>
+            <div class="pt-4">
+                <h2 class="font-bold py-3"> How to get your app password </h2>
+                You can get an app password in your Fastmail settings, under "Password &amp; Security".
+            </div>
+            <div class="pt-4">
+                <h2 class="font-bold py-3"> How to get your account ID </h2>
+                Run this. You'll need to fill in your username and app password.
+                <pre class="py-3 text-gray-700">
+$ curl https://jmap.fastmail.com/.well-known/jmap -u USERNAME:APP_PASSWORD |
+  jq '.primaryAccounts."urn:ietf:params:jmap:mail"'
+</pre>
+The reason you have to do this from the command line is that <code>https://jmap.fastmail.com/.well-known/jmap</code> doesn't allow cross-origin requests, so we can't do it in Javascript here.
+            </div>
+            <div class="pt-4">
+                <h2 class="font-bold py-3"> Security </h2>
+                <p>
+                All your authentication data is stored in your browser's local
+                storage, this app has no server code at all. (which is why you
+                have to do the weird thing above to get your account ID)
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 
-<script>
-function restore() {
-    app.username = localStorage.getItem('username');
-    app.password = localStorage.getItem('password');
-    app.accountId = localStorage.getItem('accountId');
-}
-
-function make_jmap_query(x) {
-    return {
-        "using": [ "urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail" ],
-        "methodCalls": x
-    }
-}
-
-async function get_mailbox_id(accountId) {
-    let mbox_query = make_jmap_query([[ "Mailbox/get", {
-        "accountId": accountId,
-        "ids": null
-    }, "0" ]]);
-    let data = await (await fetch('https://jmap.fastmail.com/api/', {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Basic " + authBasic()
-        },
-        body: JSON.stringify(mbox_query)
-    })).json();
-    for (mailbox of data.methodResponses[0][1]['list']) {
-        if (mailbox.name === "Reply Later") {
-            return mailbox.id;
-        }
-    }
-}
-
-async function emails_query(accountId) {
-
-    let mailbox_id = await get_mailbox_id(app.accountId);
-    return [[ "Email/query", {
-        "accountId": accountId,
-        // todo: actually do the reply later thing
-        "filter": { "inMailbox": mailbox_id },
-        "sort": [{ "property": "receivedAt", "isAscending": false }],
-        "collapseThreads": true,
-        "position": 0,
-        "limit": 20,
-        "calculateTotal": true
-    }, "t0" ],
-        [ "Email/get", {
-            "accountId": accountId,
-            "#ids": {
-                "resultOf": "t0",
-                "name": "Email/query",
-                "path": "/ids"
-            },
-            "properties": [ "threadId" ]
-        }, "t1" ],
-        [ "Thread/get", {
-            "accountId": accountId,
-            "#ids": {
-                "resultOf": "t1",
-                "name": "Email/get",
-                "path": "/list/*/threadId"
-            }
-        }, "t2" ],
-        [ "Email/get", {
-            "accountId": accountId,
-            "fetchTextBodyValues": true,
-            "#ids": {
-                "resultOf": "t2",
-                "name": "Thread/get",
-                "path": "/list/*/emailIds"
-            },
-            "properties": [ "from", "receivedAt", "subject", "bodyValues", "threadId"]
-        }, "t3" ]]
-}
-
-function groupEmails(emails) {
-    let threads = emails.reduce((groups, item) => ({
-        ...groups,
-        [item.threadId]: [...(groups[item.threadId] || []), item]
-    }), {});
-
-    let ret = [];
-    for (id in threads) {
-        let thread = threads[id];
-        let last = thread[thread.length - 1];
-        ret.push(last);
-    }
-    return ret;
-}
-
-function authBasic() {
-
-    return window.btoa(app.username + ':' + app.password);
-}
-
-async function get_emails() {
-    localStorage.setItem('username', app.username);
-    localStorage.setItem('password', app.password);
-    localStorage.setItem('accountId', app.accountId);
-    let query = make_jmap_query(await emails_query(app.accountId));
-    
-    let data = await (await fetch('https://jmap.fastmail.com/api/', {
-        url: 'https://jmap.fastmail.com/api/',
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Basic " + authBasic()
-        },
-        body: JSON.stringify(query)
-    })).json();
-    if (data.methodResponses[0][0] === 'error') {
-        return
-    }
-    app.loggedIn = true;
-    let emails = data['methodResponses'][3][1]['list'];
-    app.emails = groupEmails(emails);
-}
-
-var app = new Vue({
-    el: '#app',
-    data: {
-        message: 'Hello Vue!',
-        username: null,
-        password: null,
-        accountId: null,
-        loggedIn: false,
-        emails: []
-    },
-    methods: {
-        login: get_emails,
-        fix_email: function(email) {
-            return Object.values(email.bodyValues)[0].value.replaceAll('\n', '<br>');
-        },
-    }
-})
-restore();
-function saveTextAreas() {
-    let drafts = {};
-    for (x of document.querySelectorAll('textarea')) {
-        if (x.value) {
-            drafts[x.id] = x.value;
-        }
-    }
-    if (Object.keys(drafts).length > 0) { 
-        localStorage.setItem('drafts', JSON.stringify(drafts));
-    }
-}
-function loadTextAreas() {
-    let drafts = JSON.parse(localStorage.getItem('drafts') || '{}');
-    for (x of document.querySelectorAll('textarea')) {
-        let saved = drafts[x.id];
-        if (saved) {
-            x.value = saved;
-        }
-    }
-}
-setInterval(saveTextAreas, 1000);
-
-if(app.username && app.password && app.accountId) {
-    get_emails().then(() => {
-        loadTextAreas();
-    });
-}
-
-
-</script>
-
+<script src="focus-and-reply.js"></script>
 </body>
 </html>
