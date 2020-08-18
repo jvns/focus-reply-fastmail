@@ -25,7 +25,7 @@ async function get_mailbox_id(accountId) {
         body: JSON.stringify(mbox_query)
     })).json();
     for (mailbox of data.methodResponses[0][1]['list']) {
-        if (mailbox.name === "Reply Later") {
+        if (mailbox.name.toLowerCase() === "reply later") {
             return mailbox.id;
         }
     }
