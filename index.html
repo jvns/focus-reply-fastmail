@@ -3,6 +3,7 @@
     <head>
         <title>focus and reply</title>
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css"> 
         <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
         <!-- todo: replace with production version -->
@@ -12,16 +13,16 @@
     <h1 class="pt-4 text-3xl text-bold text-center"> focus and reply </h1>
     <div v-if="loggedIn">
         <button v-on:click.prevent="logout" class="absolute top-0 right-0 rounded my-3 mx-8 p-3 bg-green-700 text-white">Log out</button>
-        <div v-for="email in emails" class="later">
-            <h2 class="subject">{{email['subject']}}</h2>
+        <div v-for="email in emails" class="later leading-6">
+            <h2 class="subject text-2xl pt-4 font-bold">{{email['subject']}}</h2>
             <div style="display: flex">
                 <div class="left" style="width: 50%">
-                    <h3>{{email['from'][0]['name']}}</h3>
+                    <h3 class="text-xl font-bold pt-2 pb-4">{{email['from'][0]['name']}}</h3>
                     <div class="email" v-html="fix_email(email)">
                     </div>
                 </div>
                 <div class="right" style="width: 50%">
-                    <textarea :name="email.id" :id ="email.id"> </textarea>
+                    <textarea class="p-4" :name="email.id" :id ="email.id"> </textarea>
                 </div>
             </div>
         </div>
