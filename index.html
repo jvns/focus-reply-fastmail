@@ -35,7 +35,6 @@
             <form>
                 <input v-model="username" placeholder="Username" ></input>
                 <input type="password" v-model="password" placeholder="App password"></input>
-                <input v-model="accountId" placeholder="Account ID"></input>
                 <button class="text-white bg-blue-700 rounded px-3 py-1" v-on:click.prevent="login">Login</button>
             </form>
 
@@ -44,20 +43,10 @@
                 You can get an app password in your Fastmail settings, under "Password &amp; Security".
             </div>
             <div class="pt-4">
-                <h2 class="font-bold py-3"> How to get your account ID </h2>
-                Run this. You'll need to fill in your username and app password.
-                <pre class="py-3 text-gray-700">
-$ curl https://jmap.fastmail.com/.well-known/jmap -u USERNAME:APP_PASSWORD |
-  jq '.primaryAccounts."urn:ietf:params:jmap:mail"'
-</pre>
-The reason you have to do this from the command line is that <code>https://jmap.fastmail.com/.well-known/jmap</code> doesn't allow cross-origin requests, so we can't do it in Javascript here.
-            </div>
-            <div class="pt-4">
                 <h2 class="font-bold py-3"> Security </h2>
                 <p>
                 All your authentication data is stored in your browser's local
-                storage, this app has no server code at all. (which is why you
-                have to do the weird thing above to get your account ID)
+                storage, this app has no server code at all.
                 </p>
             </div>
         </div>

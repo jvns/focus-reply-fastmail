@@ -2,7 +2,6 @@ function restore() {
     let auth = JSON.parse(localStorage.getItem('auth'));
     app.username = auth.username;
     app.password = auth.password;
-    app.accountId = auth.accountId;
 }
 
 function make_jmap_query(x) {
@@ -34,7 +33,7 @@ async function get_mailbox_id(accountId) {
 
 async function emails_query(accountId) {
 
-    let mailbox_id = await get_mailbox_id(app.accountId);
+    let mailbox_id = await get_mailbox_id(accountId);
     return [[ "Email/query", {
         "accountId": accountId,
         // todo: actually do the reply later thing
@@ -98,12 +97,16 @@ async function get_emails() {
     localStorage.setItem('auth', JSON.stringify({
         username: app.username,
         password: app.password,
-        accountId: app.accountId
     }));
-    let query = make_jmap_query(await emails_query(app.accountId));
+    let session = await (await fetch('https://jmap.fastmail.com/.well-known/jmap', {
+        headers: {
+            "Authorization": "Basic " + authBasic()
+        }
+    })).json();
+    let accountId = session['primaryAccounts']['urn:ietf:params:jmap:mail'];
+    let query = make_jmap_query(await emails_query(accountId));
 
     let data = await (await fetch('https://jmap.fastmail.com/api/', {
-        url: 'https://jmap.fastmail.com/api/',
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
@@ -125,7 +128,6 @@ var app = new Vue({
         message: 'Hello Vue!',
         username: null,
         password: null,
-        accountId: null,
         loggedIn: false,
         emails: []
     },
@@ -134,7 +136,6 @@ var app = new Vue({
         logout: function() {
             app.username = null;
             app.password = null;
-            app.accountId = null;
             app.loggedIn = false;
             localStorage.clear();
         },
@@ -166,7 +167,7 @@ function loadTextAreas() {
 }
 setInterval(saveTextAreas, 1000);
 
-if(app.username && app.password && app.accountId) {
+if(app.username && app.password) {
     get_emails().then(() => {
         loadTextAreas();
     });
