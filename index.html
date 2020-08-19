@@ -19,8 +19,8 @@
             <div style="display: flex">
                 <div class="left" style="width: 50%">
                     <h3 class="text-xl font-bold pt-2 pb-4">{{email['from'][0]['name']}}</h3>
-                    <div class="email" v-html="fix_email(email)">
-                    </div>
+                    <pre class="email" v-html="fix_email(email)">
+                    </pre>
                 </div>
                 <div class="right" style="width: 50%">
                     <textarea class="p-4" :name="email.id" :id ="email.id"> </textarea>

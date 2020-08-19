@@ -140,7 +140,7 @@ var app = new Vue({
             localStorage.clear();
         },
         fix_email: function(email) {
-            return Object.values(email.bodyValues)[0].value.replaceAll('\n', '<br>');
+            return Object.values(email.bodyValues)[0].value;
         },
     }
 })

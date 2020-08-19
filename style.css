@@ -6,6 +6,13 @@ body {
     overflow: scroll;
     margin-right: 3em;
     line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+    font-family: Inter;
 }
 
 .later {
