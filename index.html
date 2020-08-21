@@ -12,7 +12,10 @@
 <body>
 <div id="app">
     <h1 class="pt-4 text-3xl text-bold text-center"> focus and reply </h1>
-    <div v-if="loggedIn">
+    <div v-if="loading">
+        <div class="lds-dual-ring m-auto" ></div>
+    </div>
+    <div v-else-if="loggedIn">
         <button v-on:click.prevent="logout" class="absolute top-0 right-0 rounded my-3 mx-8 p-3 bg-green-700 text-white">Log out</button>
         <div v-for="email in emails" class="later leading-6">
             <h2 class="subject text-2xl pt-4 font-bold">{{email['subject']}}</h2>
@@ -26,8 +29,6 @@
                 </div>
             </div>
         </div>
-    </body>
-
     </div>
     <div v-else>
         <div id="login">

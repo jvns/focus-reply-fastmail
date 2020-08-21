@@ -122,17 +122,29 @@ async function get_emails() {
     app.emails = groupEmails(emails);
 }
 
+async function login() {
+    app.loading = true;
+    get_emails().then(() => {
+        loadTextAreas();
+        app.loading = false;
+    }).catch(err => {
+        console.log(err);
+        app.loading = false;
+    });
+}
+
 var app = new Vue({
     el: '#app',
     data: {
         message: 'Hello Vue!',
         username: null,
         password: null,
+        loading: false,
         loggedIn: false,
         emails: []
     },
     methods: {
-        login: get_emails,
+        login: login,
         logout: function() {
             app.username = null;
             app.password = null;
@@ -168,7 +180,5 @@ function loadTextAreas() {
 setInterval(saveTextAreas, 1000);
 
 if(app.username && app.password) {
-    get_emails().then(() => {
-        loadTextAreas();
-    });
+    login();
 }
