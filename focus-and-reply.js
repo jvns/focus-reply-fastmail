@@ -125,8 +125,8 @@ async function get_emails() {
 async function login() {
     app.loading = true;
     get_emails().then(() => {
-        loadTextAreas();
         app.loading = false;
+        setTimeout(loadTextAreas, 100);
     }).catch(err => {
         console.log(err);
         app.loading = false;
