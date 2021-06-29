@@ -98,7 +98,7 @@ async function get_emails() {
         username: app.username,
         password: app.password,
     }));
-    let session = await (await fetch('https://jmap.fastmail.com/.well-known/jmap', {
+    let session = await (await fetch('https://jmap.fastmail.com/session', {
         headers: {
             "Authorization": "Basic " + authBasic()
         }
